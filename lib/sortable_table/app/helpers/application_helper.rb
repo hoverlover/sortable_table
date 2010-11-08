@@ -13,6 +13,14 @@ module SortableTable
           def sortable_table_header(opts = {})
             raise ArgumentError if opts[:name].nil? || opts[:sort].nil?
             anchor = opts[:anchor].blank? ? "" : "##{opts[:anchor]}"
+
+            # If this is the default column, add the :sort and :order params
+            # so the url for the default column will be calculated correctly.
+            if sorting_default?(opts)
+              params[:sort] = opts[:sort]
+              params[:order] = link_sort_order(opts) 
+            end
+
             content_tag :th, 
               link_to(opts[:name], 
                 sortable_url(opts) + anchor, 
