@@ -53,7 +53,8 @@ module SortableTable
             if re_sort? opts
               reverse_order params[:order]
             else
-              reverse_order sortable_table_direction
+              # Use the default specified in the controller, if one was specified.
+              @default_sort_direction || reverse_order(sortable_table_direction)
             end
           end
         end

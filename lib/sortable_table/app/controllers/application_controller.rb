@@ -40,6 +40,11 @@ module SortableTable
             define_method(:sort_order) do |*default| 
               default = default.first
               direction = default_sort_direction(params[:order], default)
+
+              # This variable is used by the helper when a new column is clicked.  If a default
+              # was specified, it will be used for the new column sort.
+              @default_sort_direction = default[:default] || direction
+              
               column    = params[:sort] || default_sort_column
               self.sortable_table_direction = direction
               if params[:sort] && acceptable_columns.include?(column)
