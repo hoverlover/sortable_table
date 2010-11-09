@@ -43,7 +43,7 @@ module SortableTable
 
               # This variable is used by the helper when a new column is clicked.  If a default
               # was specified, it will be used for the new column sort.
-              @default_sort_direction = default[:default] || direction
+              @default_sort_direction = default_specified?(default) ? default[:default] : direction
               
               column    = params[:sort] || default_sort_column
               self.sortable_table_direction = direction
@@ -57,13 +57,18 @@ module SortableTable
 
             helper_method :sort_order, :default_sort_column, :sortable_table_direction
           end
+
         end
         
         module InstanceMethods
+          def default_specified?(default)
+            default.is_a?(Hash) && default[:default]
+          end
+
           def default_sort_direction(order, default)
             case
             when ! order.blank?                           then normalize_direction(order)
-            when default.is_a?(Hash) && default[:default] then normalize_direction(default[:default])
+            when default_specified?(default) then normalize_direction(default[:default])
             else "descending"
             end
           end

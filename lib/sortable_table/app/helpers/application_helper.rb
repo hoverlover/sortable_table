@@ -18,7 +18,7 @@ module SortableTable
             # so the url for the default column will be calculated correctly.
             if sorting_default?(opts)
               params[:sort] = opts[:sort]
-              params[:order] = link_sort_order(opts) 
+              params[:order] = @default_sort_direction 
             end
 
             content_tag :th, 
