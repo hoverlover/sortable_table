@@ -11,6 +11,7 @@ module SortableTable
         end
         
         module ClassMethods
+
           def sortable_attributes(*args)
             mappings           = pop_hash_from_list(args)
             acceptable_columns = join_array_and_hash_values(args, mappings)
@@ -35,41 +36,41 @@ module SortableTable
               acceptable_columns.first
             end
 
-            attr_accessor :sortable_table_direction
+            attr_accessor :current_sort_direction, :default_sort_direction
 
             define_method(:sort_order) do |*default| 
               default = default.first
-              direction = default_sort_direction(params[:order], default)
+              current_direction = calculate_current_sort_direction(params[:order], default)
 
-              # This variable is used by the helper when a new column is clicked.  If a default
-              # was specified, it will be used for the new column sort.
-              @default_sort_direction = default_specified?(default) ? default[:default] : direction
+              self.default_sort_direction = default_specified?(default) ? default[:default] : self.class::DEFAULT_SORT_DIRECTION
               
-              column    = params[:sort] || default_sort_column
-              self.sortable_table_direction = direction
+              column = params[:sort] || default_sort_column
+              self.current_sort_direction = current_direction
               if params[:sort] && acceptable_columns.include?(column)
                 column = mappings[column.to_sym] || column
-                handle_compound_sorting(column, sql_sort_direction(direction))
+                handle_compound_sorting(column, sql_sort_direction(current_direction))
               else
-                "#{acceptable_columns.first} #{sql_sort_direction(direction)}"
+                "#{acceptable_columns.first} #{sql_sort_direction(current_direction)}"
               end
             end
 
-            helper_method :sort_order, :default_sort_column, :sortable_table_direction
+            helper_method :sort_order, :default_sort_column, :current_sort_direction, :default_sort_direction
           end
 
         end
         
         module InstanceMethods
+          const_set 'DEFAULT_SORT_DIRECTION', "descending"
+
           def default_specified?(default)
             default.is_a?(Hash) && default[:default]
           end
 
-          def default_sort_direction(order, default)
+          def calculate_current_sort_direction(order, default)
             case
             when ! order.blank?                           then normalize_direction(order)
             when default_specified?(default) then normalize_direction(default[:default])
-            else "descending"
+            else DEFAULT_SORT_DIRECTION
             end
           end
 
@@ -101,3 +102,4 @@ module SortableTable
     end
   end
 end
+

@@ -14,13 +14,6 @@ module SortableTable
             raise ArgumentError if opts[:name].nil? || opts[:sort].nil?
             anchor = opts[:anchor].blank? ? "" : "##{opts[:anchor]}"
 
-            # If this is the default column, add the :sort and :order params
-            # so the url for the default column will be calculated correctly.
-            if sorting_default?(opts)
-              params[:sort] = opts[:sort]
-              params[:order] = @default_sort_direction 
-            end
-
             content_tag :th, 
               link_to(opts[:name], 
                 sortable_url(opts) + anchor, 
@@ -37,7 +30,7 @@ module SortableTable
           
           def sortable_table_header_class(opts)
             if re_sort?(opts) || sorting_default?(opts)
-              sortable_table_direction
+              current_sort_direction
             end
           end
 
@@ -46,7 +39,7 @@ module SortableTable
           end
           
           def re_sort?(opts)
-            params[:sort] == opts[:sort]
+            params[:sort] == opts[:sort] || sorting_default?(opts)
           end
           
           def reverse_order(order)
@@ -59,10 +52,9 @@ module SortableTable
           
           def link_sort_order(opts)
             if re_sort? opts
-              reverse_order params[:order]
+              reverse_order current_sort_direction
             else
-              # Use the default specified in the controller, if one was specified.
-              @default_sort_direction || reverse_order(sortable_table_direction)
+              sorting_default?(opts) ? reverse_order(default_sort_direction) : default_sort_direction
             end
           end
         end
@@ -71,3 +63,4 @@ module SortableTable
     end
   end
 end
+
